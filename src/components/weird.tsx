@@ -1,5 +1,5 @@
 import { MeshProps } from "@react-three/fiber";
-import { a, b } from "./shared.ts";
+import { a, adjust, b } from "./shared.ts";
 import { useMemo } from "react";
 
 export function Weird({
@@ -24,6 +24,7 @@ export function Weird({
 			topBackLeft: [b + padding, b, -a - padding],
 			topBackRight: [a + padding, b, -a - padding],
 		};
+		adjust(p);
 
 		const faces = [
 			// [...Vertex[], Normal, Color]

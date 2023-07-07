@@ -1,5 +1,5 @@
 import { MeshProps } from "@react-three/fiber";
-import { a, b, c } from "./shared.ts";
+import { a, adjust, b, c } from "./shared.ts";
 import { useMemo } from "react";
 
 export function Pizza(
@@ -19,6 +19,7 @@ export function Pizza(
 			bottomRight: [+b, 0, -a],
 			topRight: [+b, c, -a],
 		};
+		adjust(p);
 
 		const faces = [
 			// [...Vertex[], Normal, Color]

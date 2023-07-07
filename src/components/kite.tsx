@@ -1,5 +1,5 @@
 import { MeshProps } from "@react-three/fiber";
-import { c, e, f, g } from "./shared.ts";
+import { adjust, c, e, f, g } from "./shared.ts";
 import { useMemo } from "react";
 
 const p = {
@@ -12,6 +12,7 @@ const p = {
 	bottomRight: [+e, 0, -g],
 	topRight: [+e, c, -g],
 };
+adjust(p);
 
 export function Kite(
 	props: MeshProps & {
