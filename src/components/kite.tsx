@@ -4,13 +4,13 @@ import { useMemo } from "react";
 
 const p = {
 	bottomFront: [0, 0, 0],
-	topFront: [0, +c, 0],
+	topFront: [0, c, 0],
 	bottomBack: [0, 0, -f],
-	topBack: [0, +c, -f],
+	topBack: [0, c, -f],
 	bottomLeft: [-e, 0, -g],
-	topLeft: [-e, +c, -g],
+	topLeft: [-e, c, -g],
 	bottomRight: [+e, 0, -g],
-	topRight: [+e, +c, -g],
+	topRight: [+e, c, -g],
 };
 
 export function Kite(
@@ -22,7 +22,7 @@ export function Kite(
 		};
 	}
 ) {
-	const [positions, normals, colors] = useMemo(() => {
+	const [positions, colors] = useMemo(() => {
 		const faces = [
 			// [...Vertex[], Normal, Color]
 			// Bottom face
@@ -31,7 +31,7 @@ export function Kite(
 				p.bottomLeft,
 				p.bottomFront,
 				p.bottomRight,
-				[0, 0, 1],
+				[0, -1, 0],
 				[0, 0, 0],
 			],
 			// Top face
@@ -49,7 +49,7 @@ export function Kite(
 				p.topBack,
 				p.topLeft,
 				p.bottomLeft,
-				[-1, 0, 0],
+				[-Math.SQRT1_2, 0, Math.SQRT1_2],
 				props.colors.left,
 			],
 			// Back right face
@@ -58,7 +58,7 @@ export function Kite(
 				p.topRight,
 				p.topBack,
 				p.bottomBack,
-				[-1, 0, 0],
+				[Math.SQRT1_2, 0, Math.SQRT1_2],
 				props.colors.right,
 			],
 			// Front left
@@ -67,7 +67,7 @@ export function Kite(
 				p.topLeft,
 				p.topFront,
 				p.bottomFront,
-				[1, 0, 0],
+				[-Math.SQRT1_2, 0, -Math.SQRT1_2],
 				[0, 0, 0],
 			],
 			// Front right
@@ -76,7 +76,7 @@ export function Kite(
 				p.topFront,
 				p.topRight,
 				p.bottomRight,
-				[1, 0, 0],
+				[Math.SQRT1_2, 0, -Math.SQRT1_2],
 				[0, 0, 0],
 			],
 		];
@@ -86,14 +86,9 @@ export function Kite(
 				.flatMap((face) =>
 					new Array(face.length - 4)
 						.fill(0)
-						.map((_, i) => [face[0], face[i + 1], face[i + 2]])
+						.map((_, i) => [face[0], face[i + 1], face[i + 2]].reverse())
 						.flat()
 				)
-				.flat()
-		);
-		const normals = new Float32Array(
-			faces
-				.flatMap((face) => new Array(3 * (face.length - 4)).fill(face.at(-2)))
 				.flat()
 		);
 		const colors = new Float32Array(
@@ -102,21 +97,15 @@ export function Kite(
 				.flat()
 		);
 
-		return [positions, normals, colors];
+		return [positions, colors];
 	}, [props.colors]);
 	return (
-		<mesh scale={[1, -1, 1]} {...props}>
-			<bufferGeometry>
+		<mesh {...props}>
+			<bufferGeometry onUpdate={(self) => self.computeVertexNormals()}>
 				<bufferAttribute
 					attach="attributes-position"
 					array={positions}
 					count={positions.length / 3}
-					itemSize={3}
-				/>
-				<bufferAttribute
-					attach="attributes-normal"
-					array={normals}
-					count={normals.length / 3}
 					itemSize={3}
 				/>
 				<bufferAttribute
@@ -127,7 +116,7 @@ export function Kite(
 				/>
 			</bufferGeometry>
 
-			<meshStandardMaterial vertexColors />
+			<meshLambertMaterial vertexColors />
 		</mesh>
 	);
 }
