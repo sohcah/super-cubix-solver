@@ -1,8 +1,10 @@
 export abstract class Piece {
+    static currentId = 0;
     public abstract get angle(): number;
     public get angleInRadians() {
         return this.angle * Math.PI / 180;
     }
+    id: number = Piece.currentId++;
 }
 
 export enum Color {
@@ -90,5 +92,54 @@ export class Cube {
         cube.bottom = this.bottom;
         fn(cube);
         return cube;
+    }
+    getSliceIndex(position: "top" | "bottom") {
+        let sum = 0;
+        let index = 0;
+        for (const piece of this[position]) {
+            sum += piece.angle;
+            index++;
+            if (sum >= 180) {
+                break;
+            }
+        }
+        if (sum > 180) {
+            alert("sum is greater than 180")
+            throw new Error("sum is greater than 180");
+        }
+        return index;
+    }
+    moveMiddle() {
+        return this.cloneWith(cube => {
+            const topSliceIndex = this.getSliceIndex("top");
+            const bottomSliceIndex = this.getSliceIndex("bottom");
+            cube.top = [
+                ...this.bottom.slice(0, bottomSliceIndex),
+                ...this.top.slice(topSliceIndex),
+            ]
+            cube.middle = !this.middle;
+            cube.bottom = [
+                ...this.top.slice(0, topSliceIndex),
+                ...this.bottom.slice(bottomSliceIndex),
+            ]
+        });
+    }
+    rotate(position: "top" | "bottom", antiClockwise: boolean) {
+        return this.cloneWith(cube => {
+            const moveIndex = this[position][antiClockwise ? "findIndex" : "findLastIndex"]((_, index) => {
+                if (index === 0) return false;
+                let sum = 0;
+                for (let i = 0; i < this[position].length; i++) {
+                    sum += this[position][(i + index) % this[position].length].angle;
+                    if (sum === 180) return true;
+                    if (sum > 180) return false;
+                }
+                return false;
+            });
+            cube[position] = [
+                ...this[position].slice(moveIndex),
+                ...this[position].slice(0, moveIndex),
+            ]
+        });
     }
 }

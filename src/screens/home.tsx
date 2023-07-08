@@ -1,4 +1,4 @@
-import { H4, YStack } from "tamagui";
+import { Button, H4, XStack, YStack } from "tamagui";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Pizza } from "../components/pizza.tsx";
@@ -13,6 +13,7 @@ import {
 	Piece,
 	PizzaPiece,
 } from "../models/cube.ts";
+import { useState } from "react";
 
 const padding = 0;
 
@@ -53,10 +54,47 @@ function PieceComponent({ piece, angle }: { piece: Piece; angle: number }) {
 }
 
 export function HomeScreen() {
-	const cube = new Cube();
+	const [cube, setCube] = useState(() => new Cube());
 	return (
 		<YStack flex={1} bc="black">
 			<H4>Welcome</H4>
+			<XStack gap="$2">
+				<Button
+					onPress={() => {
+						setCube(cube.rotate("top", false));
+					}}
+				>
+					Top Clockwise
+				</Button>
+				<Button
+					onPress={() => {
+						setCube(cube.rotate("top", true));
+					}}
+				>
+					Top Anticlockwise
+				</Button>
+				<Button
+					onPress={() => {
+						setCube(cube.moveMiddle());
+					}}
+				>
+					Middle
+				</Button>
+				<Button
+					onPress={() => {
+						setCube(cube.rotate("bottom", false));
+					}}
+				>
+					Bottom Clockwise
+				</Button>
+				<Button
+					onPress={() => {
+						setCube(cube.rotate("bottom", true));
+					}}
+				>
+					Bottom Anticlockwise
+				</Button>
+			</XStack>
 			<Canvas style={{ flex: 1 }}>
 				<OrbitControls enableDamping enablePan enableRotate enableZoom />
 				<ambientLight intensity={1} />
@@ -64,6 +102,7 @@ export function HomeScreen() {
 				<group position={[0, +padding + b, 0]}>
 					{cube.top.map((piece, index, array) => (
 						<PieceComponent
+							key={piece.id}
 							piece={piece}
 							angle={array
 								.slice(0, index)
@@ -100,6 +139,7 @@ export function HomeScreen() {
 				<group position={[0, -padding - b, 0]} rotation={[0, Math.PI, Math.PI]}>
 					{cube.bottom.map((piece, index, array) => (
 						<PieceComponent
+							key={piece.id}
 							piece={piece}
 							angle={array
 								.slice(0, index)
