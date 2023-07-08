@@ -12,8 +12,10 @@ import {
 	KitePiece,
 	Piece,
 	PizzaPiece,
+	State,
 } from "../models/cube.ts";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
+import { useSpring, animated } from "@react-spring/three";
 
 const padding = 0;
 
@@ -53,53 +55,51 @@ function PieceComponent({ piece, angle }: { piece: Piece; angle: number }) {
 	throw new Error("Unknown piece type");
 }
 
-export function HomeScreen() {
-	const [cube, setCube] = useState(() => new Cube());
+export function CubeDisplay({
+	state: [, movingPieces, rotation, movingMiddle, cube],
+}: {
+	state: State;
+}) {
+	const animation = useSpring({
+		rotationX: 0,
+		rotationY: 0,
+		rotationZ: 0,
+	});
+	const [previousRotation, setPreviousRotation] = useState<
+		[number, number, number]
+	>([0, 0, 0]);
+	if (rotation !== previousRotation) {
+		animation.rotationX.start(rotation[0]);
+		animation.rotationY.start(rotation[1]);
+		animation.rotationZ.start(rotation[2]);
+		setPreviousRotation(rotation);
+	}
+
+	const Moving = ({
+		piece,
+		children,
+	}: {
+		piece: Piece;
+		children: ReactNode;
+	}) => {
+		const moving = movingPieces.has(piece);
+		return (
+			<animated.group
+				rotation-x={moving ? animation.rotationX : 0}
+				rotation-y={moving ? animation.rotationY : 0}
+				rotation-z={moving ? animation.rotationZ : 0}
+			>
+				{children}
+			</animated.group>
+		);
+	};
+
 	return (
-		<YStack flex={1} bc="$color8">
-			<XStack p="$2" bc="background" borderRadius="$4" alignSelf="center" gap="$2" position="absolute" top="$2" zIndex={1}>
-				<Button
-					onPress={() => {
-						setCube(cube.rotate("top", false));
-					}}
-				>
-					Top Clockwise
-				</Button>
-				<Button
-					onPress={() => {
-						setCube(cube.rotate("top", true));
-					}}
-				>
-					Top Anticlockwise
-				</Button>
-				<Button
-					onPress={() => {
-						setCube(cube.moveMiddle());
-					}}
-				>
-					Middle
-				</Button>
-				<Button
-					onPress={() => {
-						setCube(cube.rotate("bottom", false));
-					}}
-				>
-					Bottom Clockwise
-				</Button>
-				<Button
-					onPress={() => {
-						setCube(cube.rotate("bottom", true));
-					}}
-				>
-					Bottom Anticlockwise
-				</Button>
-			</XStack>
-			<Canvas style={{ flex: 1 }}>
-				<OrbitControls enableDamping enablePan enableRotate enableZoom />
-				<ambientLight intensity={1} />
-				{/*<pointLight position={[10, 10, 10]} />*/}
-				<group position={[0, +padding + b, 0]}>
-					{cube.top.map((piece, index, array) => (
+		<>
+			{/*<pointLight position={[10, 10, 10]} />*/}
+			{cube.top.map((piece, index, array) => (
+				<Moving piece={piece}>
+					<group position={[0, +padding + b, 0]}>
 						<PieceComponent
 							key={piece.id}
 							piece={piece}
@@ -107,9 +107,14 @@ export function HomeScreen() {
 								.slice(0, index)
 								.reduce((a, b) => a + b.angleInRadians, 0)}
 						/>
-					))}
-				</group>
-
+					</group>
+				</Moving>
+			))}
+			<animated.group
+				rotation-x={movingMiddle ? animation.rotationX : 0}
+				rotation-y={movingMiddle ? animation.rotationY : 0}
+				rotation-z={movingMiddle ? animation.rotationZ : 0}
+			>
 				<group rotation={[cube.middle ? 0 : Math.PI, 0, 0]}>
 					<group rotation={[0, (1 / 12) * Math.PI, 0]}>
 						<Weird
@@ -123,20 +128,25 @@ export function HomeScreen() {
 						/>
 					</group>
 				</group>
-				<group rotation={[0, (1 / 12) * Math.PI, 0]}>
-					<Weird
-						colors={{
-							back: getColorValue(Color.Red),
-							side: getColorValue(Color.Blue),
-							front: getColorValue(Color.Orange),
-						}}
-						position={[0, 0, 0]}
-						rotation={[0, Math.PI, 0]}
-					/>
-				</group>
+			</animated.group>
+			<group rotation={[0, (1 / 12) * Math.PI, 0]}>
+				<Weird
+					colors={{
+						back: getColorValue(Color.Red),
+						side: getColorValue(Color.Blue),
+						front: getColorValue(Color.Orange),
+					}}
+					position={[0, 0, 0]}
+					rotation={[0, Math.PI, 0]}
+				/>
+			</group>
 
-				<group position={[0, -padding - b, 0]} rotation={[0, Math.PI, Math.PI]}>
-					{cube.bottom.map((piece, index, array) => (
+			{cube.bottom.map((piece, index, array) => (
+				<Moving piece={piece}>
+					<group
+						position={[0, -padding - b, 0]}
+						rotation={[0, Math.PI, Math.PI]}
+					>
 						<PieceComponent
 							key={piece.id}
 							piece={piece}
@@ -144,8 +154,74 @@ export function HomeScreen() {
 								.slice(0, index)
 								.reduce((a, b) => a + b.angleInRadians, 0)}
 						/>
-					))}
-				</group>
+					</group>
+				</Moving>
+			))}
+		</>
+	);
+}
+
+export function HomeScreen() {
+	const [state, setState] = useState<State>(() => [
+		new Cube(),
+		new Set([]),
+		[0, 0, 0],
+		false,
+		new Cube(),
+	]);
+
+	return (
+		<YStack flex={1} bc="$color8">
+			<XStack
+				p="$2"
+				bc="background"
+				borderRadius="$4"
+				alignSelf="center"
+				gap="$2"
+				position="absolute"
+				top="$2"
+				zIndex={1}
+			>
+				<Button
+					onPress={() => {
+						setState(state[0].rotate("top", false));
+					}}
+				>
+					Top Clockwise
+				</Button>
+				<Button
+					onPress={() => {
+						setState(state[0].rotate("top", true));
+					}}
+				>
+					Top Anticlockwise
+				</Button>
+				<Button
+					onPress={() => {
+						setState(state[0].moveMiddle());
+					}}
+				>
+					Middle
+				</Button>
+				<Button
+					onPress={() => {
+						setState(state[0].rotate("bottom", false));
+					}}
+				>
+					Bottom Clockwise
+				</Button>
+				<Button
+					onPress={() => {
+						setState(state[0].rotate("bottom", true));
+					}}
+				>
+					Bottom Anticlockwise
+				</Button>
+			</XStack>
+			<Canvas style={{ flex: 1 }}>
+				<OrbitControls enableDamping enablePan enableRotate enableZoom />
+				<ambientLight intensity={1} />
+				<CubeDisplay key={state[0].id} state={state} />
 			</Canvas>
 		</YStack>
 	);
