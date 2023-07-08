@@ -20,9 +20,8 @@ function PieceComponent({ piece, angle }: { piece: Piece; angle: number }) {
 	const paddingOffset = Math.sqrt(1 + Math.abs(Math.sin(2 * angle)) ** 2);
 	if (piece instanceof PizzaPiece) {
 		return (
-			<group rotation={[0, -angle - toRad(30), 0]}>
+			<group rotation={[0, -angle - toRad(15), 0]}>
 				<Pizza
-					angle={-angle - toRad(30)}
 					colors={{
 						top: getColorValue(piece.top),
 						side: getColorValue(piece.side),
@@ -34,9 +33,8 @@ function PieceComponent({ piece, angle }: { piece: Piece; angle: number }) {
 	}
 	if (piece instanceof KitePiece) {
 		return (
-			<group rotation={[0, -angle - toRad(45), 0]}>
+			<group rotation={[0, -angle - toRad(30), 0]}>
 				<Kite
-					angle={-angle - toRad(45)}
 					colors={{
 						top: getColorValue(piece.top),
 						left: getColorValue(piece.left),
@@ -74,28 +72,32 @@ export function HomeScreen() {
 					))}
 				</group>
 
-				<group rotation={[0, 0, 0]}>
+				<group rotation={[cube.middle ? 0 : Math.PI, 0, 0]}>
+					<group rotation={[0, (1 / 12) * Math.PI, 0]}>
+						<Weird
+							colors={{
+								back: getColorValue(Color.Orange),
+								side: getColorValue(Color.Yellow),
+								front: getColorValue(Color.Red),
+							}}
+							position={[0, 0, 0]}
+							rotation={[0, 0, 0]}
+						/>
+					</group>
+				</group>
+				<group rotation={[0, (1 / 12) * Math.PI, 0]}>
 					<Weird
 						colors={{
-							back: getColorValue(Color.Orange),
-							side: getColorValue(Color.Yellow),
-							front: getColorValue(Color.Red),
+							back: getColorValue(Color.Red),
+							side: getColorValue(Color.Blue),
+							front: getColorValue(Color.Orange),
 						}}
 						position={[0, 0, 0]}
-						rotation={[0, 0, 0]}
+						rotation={[0, Math.PI, 0]}
 					/>
 				</group>
-				<Weird
-					colors={{
-						back: getColorValue(Color.Red),
-						side: getColorValue(Color.Blue),
-						front: getColorValue(Color.Orange),
-					}}
-					position={[0, 0, 0]}
-					rotation={[0, Math.PI, 0]}
-				/>
 
-				<group position={[0, -padding - b, 0]} rotation={[0, 5/6 * Math.PI, Math.PI]}>
+				<group position={[0, -padding - b, 0]} rotation={[0, Math.PI, Math.PI]}>
 					{cube.bottom.map((piece, index, array) => (
 						<PieceComponent
 							piece={piece}

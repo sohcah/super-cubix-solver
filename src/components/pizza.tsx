@@ -2,16 +2,14 @@ import { MeshProps } from "@react-three/fiber";
 import { a, adjust, b, c } from "./shared.ts";
 import { useMemo } from "react";
 
-export function Pizza({
-	angle,
-	...props
-}: MeshProps & {
-	colors: {
-		top: [number, number, number];
-		side: [number, number, number];
-	};
-	angle: number;
-}) {
+export function Pizza(
+	props: MeshProps & {
+		colors: {
+			top: [number, number, number];
+			side: [number, number, number];
+		};
+	}
+) {
 	const [positions, colors] = useMemo(() => {
 		const p = {
 			bottomFront: [0, 0, 0],
@@ -21,7 +19,7 @@ export function Pizza({
 			bottomRight: [+b, 0, -a],
 			topRight: [+b, c, -a],
 		};
-		adjust(p, angle);
+		adjust(p);
 
 		const faces = [
 			// [...Vertex[], Normal, Color]
@@ -75,7 +73,7 @@ export function Pizza({
 		);
 
 		return [positions, colors];
-	}, [props.colors, angle]);
+	}, [props.colors]);
 	return (
 		<mesh {...props}>
 			<bufferGeometry onUpdate={(self) => self.computeVertexNormals()}>

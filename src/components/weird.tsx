@@ -1,5 +1,5 @@
 import { MeshProps } from "@react-three/fiber";
-import { a, adjust, b, x } from "./shared.ts";
+import { a, b, x } from "./shared.ts";
 import { useMemo } from "react";
 
 export function Weird({
@@ -12,17 +12,18 @@ export function Weird({
 	};
 }) {
 	const [positions, colors] = useMemo(() => {
+		const padding = x * Math.SQRT1_2;
 		const p = {
-			bottomFrontLeft: [-b, -b, a],
-			bottomFrontRight: [a, -b, a],
-			bottomBackLeft: [b, -b, -a],
-			bottomBackRight: [a, -b, -a],
-			topFrontLeft: [-b, b, a],
-			topFrontRight: [a, b, a],
-			topBackLeft: [b, b, -a],
-			topBackRight: [a, b, -a],
+			bottomFrontLeft: [-b + padding / 2, -b, a - padding],
+			bottomFrontRight: [a - padding, -b, a - padding],
+			bottomBackLeft: [b + padding, -b, -a + padding],
+			bottomBackRight: [a - padding, -b, -a + padding],
+			topFrontLeft: [-b + padding / 2, b, a - padding],
+			topFrontRight: [a - padding, b, a - padding],
+			topBackLeft: [b + padding, b, -a + padding],
+			topBackRight: [a - padding, b, -a + padding],
 		};
-		adjust(p, 0, (x * 3) / 2);
+		// adjust(p, x * 2 / 3, 1);
 
 		const faces = [
 			// [...Vertex[], Normal, Color]

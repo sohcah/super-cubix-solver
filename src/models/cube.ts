@@ -62,7 +62,7 @@ export class KitePiece extends Piece {
     }
 }
 export class Cube {
-    middle = false;
+    middle = true;
     top: Piece[] = [
         new KitePiece(Color.White, Color.Orange, Color.Yellow),
         new PizzaPiece(Color.White, Color.Yellow),
