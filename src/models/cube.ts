@@ -71,10 +71,11 @@ export class KitePiece extends Piece {
 }
 
 export class Cube {
+	static SOLVED_FULL_ID = 0x10123456789abcden;
 	static currentId = 0;
 	id = Cube.currentId++;
 	middle = true;
-	top: Piece[] = [
+	static DEFAULT_TOP = [
 		new KitePiece(Color.White, Color.Orange, Color.Yellow),
 		new PizzaPiece(Color.White, Color.Yellow),
 		new KitePiece(Color.White, Color.Yellow, Color.Red),
@@ -84,7 +85,8 @@ export class Cube {
 		new KitePiece(Color.White, Color.Blue, Color.Orange),
 		new PizzaPiece(Color.White, Color.Orange),
 	];
-	bottom: Piece[] = [
+	top: Piece[] = Cube.DEFAULT_TOP;
+	static DEFAULT_BOTTOM = [
 		new PizzaPiece(Color.Green, Color.Red),
 		new KitePiece(Color.Green, Color.Red, Color.Yellow),
 		new PizzaPiece(Color.Green, Color.Yellow),
@@ -94,6 +96,45 @@ export class Cube {
 		new PizzaPiece(Color.Green, Color.Blue),
 		new KitePiece(Color.Green, Color.Blue, Color.Red),
 	];
+	bottom: Piece[] = Cube.DEFAULT_BOTTOM;
+
+	private get pieces() {
+		return [...this.top, ...this.bottom].slice(0, -1);
+	}
+
+	private get rotationlessPieces() {
+		const topIndex = this.top.reduce((min, piece, index) => {
+			if (piece.id < this.top[min].id) {
+				return index;
+			}
+			return min;
+		}, 0);
+		const bottomIndex = this.bottom.reduce((min, piece, index) => {
+			if (piece.id < this.bottom[min].id) {
+				return index;
+			}
+			return min;
+		}, 0);
+		return [...this.top.slice(topIndex), ...this.top.slice(0, topIndex), ...this.bottom.slice(bottomIndex), ...this.bottom.slice(0, bottomIndex)].slice(0, -1);
+	}
+
+	get fullId() {
+		let id = this.middle ? 1n : 0n;
+		for (const piece of this.pieces) {
+			id <<= 4n;
+			id += BigInt(piece.id);
+		}
+		return id;
+	}
+
+	get rotationlessId() {
+		let id = this.middle ? 1n : 0n;
+		for (const piece of this.rotationlessPieces) {
+			id <<= 4n;
+			id += BigInt(piece.id);
+		}
+		return id;
+	}
 
 	cloneWith(fn: (cube: Cube) => void) {
 		const cube = new Cube();
@@ -183,21 +224,69 @@ export class Cube {
 
 	get shapeId() {
 		let id = 0;
-		let value = 16384;
-		if (!this.middle) {
-			id += 32768
+		if (!this.middle) id++;
+		for (const piece of this.pieces) {
+			id <<= 1;
+			if (piece instanceof PizzaPiece) id++;
 		}
-		for (const piece of this.top) {
-			if (piece instanceof PizzaPiece) {
-				id += value
+		return id;
+	}
+
+	private getMinimumShapeIdPieces(pieces: Piece[]) {
+		const v1 = this.getMinimumShapeIdPieces1(pieces);
+		const v2 = this.getMinimumShapeIdPieces2(pieces);
+		console.assert(JSON.stringify(v1.map(i => i.id)) === JSON.stringify(v2.map(i => i.id)));
+		return v2;
+	}
+
+	private getMinimumShapeIdPieces1(pieces: Piece[]) {
+		const [, index] = pieces.reduce(([minId, minIndex], _, index) => {
+			let id = 0;
+			for (const piece of [...pieces.slice(index), ...pieces.slice(0, index)]) {
+				id <<= 1;
+				if (piece instanceof PizzaPiece) id++;
 			}
-			value /= 2;
+			return id < minId ? [id, index] : [minId, minIndex]
+		}, [Infinity, 0]);
+		return [...pieces.slice(index), ...pieces.slice(0, index)];
+	}
+
+	private getMinimumShapeIdPieces2(pieces: Piece[]) {
+		let minId = Infinity;
+		let minIndex = 0;
+
+		for (let index = 0; index < pieces.length; index++) {
+			let id = 0;
+			for (const piece of [...pieces.slice(index), ...pieces.slice(0, index)]) {
+				id <<= 1;
+				if (piece instanceof PizzaPiece) {
+					id++;
+				}
+			}
+			if (id < minId) {
+				minId = id;
+				minIndex = index;
+			}
 		}
-		for (const piece of this.bottom.slice(0,-1)) {
+
+		return [...pieces.slice(minIndex), ...pieces.slice(0, minIndex)];
+	}
+
+
+	get rotationlessShapeId() {
+		let id = 0;
+		if (!this.middle) id++;
+		for (const piece of this.getMinimumShapeIdPieces(this.top)) {
+			id <<= 1;
 			if (piece instanceof PizzaPiece) {
-				id += value
+				id++;
 			}
-			value /= 2;
+		}
+		for (const piece of this.getMinimumShapeIdPieces(this.bottom).slice(0, -1)) {
+			id <<= 1;
+			if (piece instanceof PizzaPiece) {
+				id++;
+			}
 		}
 
 		return id;

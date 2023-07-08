@@ -170,6 +170,13 @@ export function HomeScreen() {
 		new Cube(),
 	]);
 
+	console.table({
+		full: state[0].fullId.toString(16).padStart(16, "0"),
+		rotationless: state[0].rotationlessId.toString(16).padStart(16, "0"),
+		shape: state[0].shapeId.toString(2).padStart(16, "0"),
+		rotationlessShape: state[0].rotationlessShapeId.toString(2).padStart(16, "0"),
+	})
+
 	return (
 		<YStack flex={1} bc="$color8">
 			<XStack
