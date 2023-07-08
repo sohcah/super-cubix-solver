@@ -141,10 +141,10 @@ export function CubeDisplay({
 				/>
 			</group>
 
-			<group position={[0, -padding - b, 0]} rotation={[0, Math.PI, Math.PI]}>
+			<group rotation={[0, Math.PI, Math.PI]}>
 				{cube.bottom.map((piece, index, array) => (
 					<Moving piece={piece}>
-						<group>
+						<group position={[0, padding + b, 0]}>
 							<PieceComponent
 								key={piece.id}
 								piece={piece}
