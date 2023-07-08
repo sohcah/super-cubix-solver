@@ -16,6 +16,7 @@ import {
 } from "../models/cube.ts";
 import { ReactNode, useState } from "react";
 import { useSpring, animated } from "@react-spring/three";
+import { Redo, Undo } from "@tamagui/lucide-icons";
 
 const padding = 0;
 
@@ -176,46 +177,57 @@ export function HomeScreen() {
 				bc="background"
 				borderRadius="$4"
 				alignSelf="center"
+				flexWrap="wrap"
+				justifyContent="center"
 				gap="$2"
 				position="absolute"
 				top="$2"
 				zIndex={1}
 			>
+				<XStack gap="$2">
+					<Button
+						icon={Undo}
+						onPress={() => {
+							setState(state[0].rotate("top", true));
+						}}
+					>
+						Top
+					</Button>
+					<Button
+						icon={Redo}
+						onPress={() => {
+							setState(state[0].rotate("top", false));
+						}}
+					>
+						Top
+					</Button>
+				</XStack>
 				<Button
-					onPress={() => {
-						setState(state[0].rotate("top", false));
-					}}
-				>
-					Top Clockwise
-				</Button>
-				<Button
-					onPress={() => {
-						setState(state[0].rotate("top", true));
-					}}
-				>
-					Top Anticlockwise
-				</Button>
-				<Button
+					icon={Redo}
 					onPress={() => {
 						setState(state[0].moveMiddle());
 					}}
 				>
 					Middle
 				</Button>
-				<Button
-					onPress={() => {
-						setState(state[0].rotate("bottom", false));
-					}}
-				>
-					Bottom Clockwise
-				</Button>
-				<Button
-					onPress={() => {
-						setState(state[0].rotate("bottom", true));
-					}}
-				>
-					Bottom Anticlockwise
-				</Button>
+				<XStack gap="$2">
+					<Button
+						icon={Undo}
+						onPress={() => {
+							setState(state[0].rotate("bottom", true));
+						}}
+					>
+						Bottom
+					</Button>
+					<Button
+						icon={Redo}
+						onPress={() => {
+							setState(state[0].rotate("bottom", false));
+						}}
+					>
+						Bottom
+					</Button>
+				</XStack>
 			</XStack>
 			<Canvas style={{ flex: 1 }}>
 				<OrbitControls enableDamping enablePan enableRotate enableZoom />
