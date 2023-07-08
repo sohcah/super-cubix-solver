@@ -180,6 +180,29 @@ export class Cube {
 			this,
 		];
 	}
+
+	get shapeId() {
+		let id = 0;
+		let value = 16384;
+		if (!this.middle) {
+			id += 32768
+		}
+		for (const piece of this.top) {
+			if (piece instanceof PizzaPiece) {
+				id += value
+			}
+			value /= 2;
+		}
+		for (const piece of this.bottom.slice(0,-1)) {
+			if (piece instanceof PizzaPiece) {
+				id += value
+			}
+			value /= 2;
+		}
+
+		return id;
+	}
+
 }
 
 export type State = [
