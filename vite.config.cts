@@ -86,7 +86,7 @@ export default defineConfig({
         },
     ],
     build: {
-        outDir: "web-build",
+        outDir: "dist",
         commonjsOptions: {
             transformMixedEsModules: true,
             extensions,
