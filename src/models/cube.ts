@@ -233,25 +233,6 @@ export class Cube {
 	}
 
 	private getMinimumShapeIdPieces(pieces: Piece[]) {
-		const v1 = this.getMinimumShapeIdPieces1(pieces);
-		const v2 = this.getMinimumShapeIdPieces2(pieces);
-		console.assert(JSON.stringify(v1.map(i => i.id)) === JSON.stringify(v2.map(i => i.id)));
-		return v2;
-	}
-
-	private getMinimumShapeIdPieces1(pieces: Piece[]) {
-		const [, index] = pieces.reduce(([minId, minIndex], _, index) => {
-			let id = 0;
-			for (const piece of [...pieces.slice(index), ...pieces.slice(0, index)]) {
-				id <<= 1;
-				if (piece instanceof PizzaPiece) id++;
-			}
-			return id < minId ? [id, index] : [minId, minIndex]
-		}, [Infinity, 0]);
-		return [...pieces.slice(index), ...pieces.slice(0, index)];
-	}
-
-	private getMinimumShapeIdPieces2(pieces: Piece[]) {
 		let minId = Infinity;
 		let minIndex = 0;
 
