@@ -141,22 +141,21 @@ export function CubeDisplay({
 				/>
 			</group>
 
-			{cube.bottom.map((piece, index, array) => (
-				<Moving piece={piece}>
-					<group
-						position={[0, -padding - b, 0]}
-						rotation={[0, Math.PI, Math.PI]}
-					>
-						<PieceComponent
-							key={piece.id}
-							piece={piece}
-							angle={array
-								.slice(0, index)
-								.reduce((a, b) => a + b.angleInRadians, 0)}
-						/>
-					</group>
-				</Moving>
-			))}
+			<group position={[0, -padding - b, 0]} rotation={[0, Math.PI, Math.PI]}>
+				{cube.bottom.map((piece, index, array) => (
+					<Moving piece={piece}>
+						<group>
+							<PieceComponent
+								key={piece.id}
+								piece={piece}
+								angle={array
+									.slice(0, index)
+									.reduce((a, b) => a + b.angleInRadians, 0)}
+							/>
+						</group>
+					</Moving>
+				))}
+			</group>
 		</>
 	);
 }
