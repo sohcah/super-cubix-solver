@@ -1,9 +1,8 @@
 import { MeshProps } from "@react-three/fiber";
-import { a, adjust, b } from "./shared.ts";
+import { a, adjust, b, x } from "./shared.ts";
 import { useMemo } from "react";
 
 export function Weird({
-	padding,
 	...props
 }: MeshProps & {
 	colors: {
@@ -11,20 +10,19 @@ export function Weird({
 		side: [number, number, number];
 		front: [number, number, number];
 	};
-	padding: number;
 }) {
 	const [positions, colors] = useMemo(() => {
 		const p = {
-			bottomFrontLeft: [-b, -b, a + padding],
-			bottomFrontRight: [a + padding, -b, a + padding],
-			bottomBackLeft: [b + padding, -b, -a - padding],
-			bottomBackRight: [a + padding, -b, -a - padding],
-			topFrontLeft: [-b, b, a + padding],
-			topFrontRight: [a + padding, b, a + padding],
-			topBackLeft: [b + padding, b, -a - padding],
-			topBackRight: [a + padding, b, -a - padding],
+			bottomFrontLeft: [-b, -b, a],
+			bottomFrontRight: [a, -b, a],
+			bottomBackLeft: [b, -b, -a],
+			bottomBackRight: [a, -b, -a],
+			topFrontLeft: [-b, b, a],
+			topFrontRight: [a, b, a],
+			topBackLeft: [b, b, -a],
+			topBackRight: [a, b, -a],
 		};
-		adjust(p);
+		adjust(p, 0, (x * 3) / 2);
 
 		const faces = [
 			// [...Vertex[], Normal, Color]
@@ -101,7 +99,7 @@ export function Weird({
 		);
 
 		return [positions, colors];
-	}, [props.colors, padding]);
+	}, [props.colors]);
 	return (
 		<mesh {...props}>
 			<bufferGeometry onUpdate={(self) => self.computeVertexNormals()}>

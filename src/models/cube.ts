@@ -64,13 +64,13 @@ export class KitePiece extends Piece {
 export class Cube {
     middle = false;
     top: Piece[] = [
-        new KitePiece(Color.White, Color.Blue, Color.Orange),
         new KitePiece(Color.White, Color.Orange, Color.Yellow),
         new PizzaPiece(Color.White, Color.Yellow),
         new KitePiece(Color.White, Color.Yellow, Color.Red),
         new PizzaPiece(Color.White, Color.Red),
         new KitePiece(Color.White, Color.Red, Color.Blue),
         new PizzaPiece(Color.White, Color.Blue),
+        new KitePiece(Color.White, Color.Blue, Color.Orange),
         new PizzaPiece(Color.White, Color.Orange),
     ];
     bottom: Piece[] = [

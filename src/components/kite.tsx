@@ -2,28 +2,29 @@ import { MeshProps } from "@react-three/fiber";
 import { adjust, c, e, f, g } from "./shared.ts";
 import { useMemo } from "react";
 
-const p = {
-	bottomFront: [0, 0, 0],
-	topFront: [0, c, 0],
-	bottomBack: [0, 0, -f],
-	topBack: [0, c, -f],
-	bottomLeft: [-e, 0, -g],
-	topLeft: [-e, c, -g],
-	bottomRight: [+e, 0, -g],
-	topRight: [+e, c, -g],
-};
-adjust(p);
-
-export function Kite(
-	props: MeshProps & {
-		colors: {
-			top: [number, number, number];
-			left: [number, number, number];
-			right: [number, number, number];
-		};
-	}
-) {
+export function Kite({
+	angle,
+	...props
+}: MeshProps & {
+	colors: {
+		top: [number, number, number];
+		left: [number, number, number];
+		right: [number, number, number];
+	};
+	angle: number;
+}) {
 	const [positions, colors] = useMemo(() => {
+		const p = {
+			bottomFront: [0, 0, 0],
+			topFront: [0, c, 0],
+			bottomBack: [0, 0, -f],
+			topBack: [0, c, -f],
+			bottomLeft: [-e, 0, -g],
+			topLeft: [-e, c, -g],
+			bottomRight: [+e, 0, -g],
+			topRight: [+e, c, -g],
+		};
+		adjust(p, angle);
 		const faces = [
 			// [...Vertex[], Normal, Color]
 			// Bottom face
@@ -99,7 +100,7 @@ export function Kite(
 		);
 
 		return [positions, colors];
-	}, [props.colors]);
+	}, [props.colors, angle]);
 	return (
 		<mesh {...props}>
 			<bufferGeometry onUpdate={(self) => self.computeVertexNormals()}>
