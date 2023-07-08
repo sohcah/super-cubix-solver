@@ -1,4 +1,4 @@
-import { Button, H4, XStack, YStack } from "tamagui";
+import { Button, XStack, YStack } from "tamagui";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Pizza } from "../components/pizza.tsx";
@@ -56,9 +56,8 @@ function PieceComponent({ piece, angle }: { piece: Piece; angle: number }) {
 export function HomeScreen() {
 	const [cube, setCube] = useState(() => new Cube());
 	return (
-		<YStack flex={1} bc="black">
-			<H4>Welcome</H4>
-			<XStack gap="$2">
+		<YStack flex={1} bc="$color8">
+			<XStack p="$2" bc="background" borderRadius="$4" alignSelf="center" gap="$2" position="absolute" top="$2" zIndex={1}>
 				<Button
 					onPress={() => {
 						setCube(cube.rotate("top", false));
