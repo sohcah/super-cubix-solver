@@ -17,6 +17,7 @@ import {
 import { ReactNode, useState } from "react";
 import { useSpring, animated } from "@react-spring/three";
 import { Redo, Undo } from "@tamagui/lucide-icons";
+import {solveForColours, solveForCube} from "../models/solver.ts";
 
 const padding = 0;
 
@@ -161,21 +162,23 @@ export function CubeDisplay({
 	);
 }
 
+const initialCube = new Cube("kppkkpkp_kppkpkpk");
+
 export function HomeScreen() {
 	const [state, setState] = useState<State>(() => [
-		new Cube(),
+		initialCube,
 		new Set([]),
 		[0, 0, 0],
 		false,
-		new Cube(),
+		initialCube,
 	]);
 
-	console.table({
-		full: state[0].fullId.toString(16).padStart(16, "0"),
-		rotationless: state[0].rotationlessId.toString(16).padStart(16, "0"),
-		shape: state[0].shapeId.toString(2).padStart(16, "0"),
-		rotationlessShape: state[0].rotationlessShapeId.toString(2).padStart(16, "0"),
-	})
+	// console.table({
+	// 	full: state[0].fullId.toString(16).padStart(16, "0"),
+	// 	rotationless: state[0].rotationlessId.toString(16).padStart(16, "0"),
+	// 	shape: state[0].shapeId.toString(2).padStart(16, "0"),
+	// 	rotationlessShape: state[0].rotationlessShapeId.toString(2).padStart(16, "0"),
+	// })
 
 	return (
 		<YStack flex={1} bc="$color8">
@@ -207,6 +210,20 @@ export function HomeScreen() {
 						}}
 					>
 						Top
+					</Button>
+					<Button
+						onPress={() => {
+							console.log(solveForCube(state[0]));
+						}}
+					>
+						Solve
+					</Button>
+					<Button
+						onPress={() => {
+							console.log(solveForColours(state[0]));
+						}}
+					>
+						Solve2
 					</Button>
 				</XStack>
 				<Button

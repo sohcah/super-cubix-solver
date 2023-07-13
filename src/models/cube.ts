@@ -98,6 +98,34 @@ export class Cube {
 	];
 	bottom: Piece[] = Cube.DEFAULT_BOTTOM;
 
+	constructor(pieces?: string) {
+		if (pieces) {
+			pieces = pieces.replace(/_/g, "");
+			let allPieces = [...Cube.DEFAULT_TOP, ...Cube.DEFAULT_BOTTOM];
+			this.top = [];
+			this.bottom = [];
+			let topAngle = 0;
+			for(const letter of pieces) {
+				let pieceToAdd: Piece | undefined;
+				if(letter.toLowerCase() === "p") {
+					pieceToAdd = allPieces.find(piece => piece instanceof PizzaPiece);
+				} else if(letter.toLowerCase() === "k") {
+					pieceToAdd = allPieces.find(piece => piece instanceof KitePiece);
+				}
+				if(!pieceToAdd) {
+					throw new Error(`Unknown piece ${letter}`);
+				}
+				if (topAngle < 360) {
+					this.top.push(pieceToAdd);
+					topAngle += pieceToAdd.angle;
+				} else {
+					this.bottom.push(pieceToAdd);
+				}
+				allPieces = allPieces.filter(piece => piece !== pieceToAdd);
+			}
+		}
+	}
+
 	private get pieces() {
 		return [...this.top, ...this.bottom].slice(0, -1);
 	}
@@ -145,7 +173,7 @@ export class Cube {
 		return cube;
 	}
 
-	getSliceIndex(position: "top" | "bottom") {
+	protected getSliceIndexInternal(position: "top" | "bottom") {
 		let sum = 0;
 		let index = 0;
 		for (const piece of this[position]) {
@@ -155,8 +183,14 @@ export class Cube {
 				break;
 			}
 		}
-		if (sum > 180) {
-			alert("sum is greater than 180");
+		if (sum > 180) return null;
+		return index;
+	}
+
+	getSliceIndex(position: "top" | "bottom") {
+		const index = this.getSliceIndexInternal(position);
+		if (index === null) {
+			// alert("sum is greater than 180");
 			throw new Error("sum is greater than 180");
 		}
 		return index;
@@ -186,6 +220,26 @@ export class Cube {
 			true,
 			this,
 		];
+	}
+
+	swap(topIndex: number, bottomIndex: number): Cube | null {
+		const cubeWithRotatedTopAndBottom = this.cloneWith((cube) => {
+			cube.top = [
+				...this.top.slice(topIndex),
+				...this.top.slice(0, topIndex),
+			];
+			cube.bottom = [
+				...this.bottom.slice(bottomIndex),
+				...this.bottom.slice(0, bottomIndex),
+			];
+		});
+
+		try {
+			return cubeWithRotatedTopAndBottom.moveMiddle()[0];
+		}
+		catch (e) {
+			return null;
+		}
 	}
 
 	rotate(position: "top" | "bottom", antiClockwise: boolean): State {
