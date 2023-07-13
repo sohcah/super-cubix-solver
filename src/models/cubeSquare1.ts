@@ -1,4 +1,5 @@
 import { toRad } from "../components/shared.ts";
+import { Color } from "./colors.ts";
 
 export abstract class Piece {
 	static currentId = 0;
@@ -10,32 +11,6 @@ export abstract class Piece {
 	}
 
 	id: number = Piece.currentId++;
-}
-
-export enum Color {
-	White = "white",
-	Green = "green",
-	Orange = "orange",
-	Yellow = "yellow",
-	Red = "red",
-	Blue = "blue",
-}
-
-export function getColorValue(color: Color): [number, number, number] {
-	switch (color) {
-		case Color.White:
-			return [1, 1, 1];
-		case Color.Green:
-			return [0, 1, 0];
-		case Color.Orange:
-			return [1, 0.1, 0];
-		case Color.Yellow:
-			return [1, 1, 0];
-		case Color.Red:
-			return [1, 0, 0];
-		case Color.Blue:
-			return [0, 0, 1];
-	}
 }
 
 export class PizzaPiece extends Piece {
@@ -70,10 +45,10 @@ export class KitePiece extends Piece {
 	}
 }
 
-export class Cube {
+export class CubeSquare1 {
 	static SOLVED_FULL_ID = 0x10123456789abcden;
 	static currentId = 0;
-	id = Cube.currentId++;
+	id = CubeSquare1.currentId++;
 	middle = true;
 	static DEFAULT_TOP = [
 		new KitePiece(Color.White, Color.Orange, Color.Yellow),
@@ -85,7 +60,7 @@ export class Cube {
 		new KitePiece(Color.White, Color.Blue, Color.Orange),
 		new PizzaPiece(Color.White, Color.Orange),
 	];
-	top: Piece[] = Cube.DEFAULT_TOP;
+	top: Piece[] = CubeSquare1.DEFAULT_TOP;
 	static DEFAULT_BOTTOM = [
 		new PizzaPiece(Color.Green, Color.Red),
 		new KitePiece(Color.Green, Color.Red, Color.Yellow),
@@ -96,23 +71,26 @@ export class Cube {
 		new PizzaPiece(Color.Green, Color.Blue),
 		new KitePiece(Color.Green, Color.Blue, Color.Red),
 	];
-	bottom: Piece[] = Cube.DEFAULT_BOTTOM;
+	bottom: Piece[] = CubeSquare1.DEFAULT_BOTTOM;
 
 	constructor(pieces?: string) {
 		if (pieces) {
 			pieces = pieces.replace(/_/g, "");
-			let allPieces = [...Cube.DEFAULT_TOP, ...Cube.DEFAULT_BOTTOM];
+			let allPieces = [
+				...CubeSquare1.DEFAULT_TOP,
+				...CubeSquare1.DEFAULT_BOTTOM,
+			];
 			this.top = [];
 			this.bottom = [];
 			let topAngle = 0;
-			for(const letter of pieces) {
+			for (const letter of pieces) {
 				let pieceToAdd: Piece | undefined;
-				if(letter.toLowerCase() === "p") {
-					pieceToAdd = allPieces.find(piece => piece instanceof PizzaPiece);
-				} else if(letter.toLowerCase() === "k") {
-					pieceToAdd = allPieces.find(piece => piece instanceof KitePiece);
+				if (letter.toLowerCase() === "p") {
+					pieceToAdd = allPieces.find((piece) => piece instanceof PizzaPiece);
+				} else if (letter.toLowerCase() === "k") {
+					pieceToAdd = allPieces.find((piece) => piece instanceof KitePiece);
 				}
-				if(!pieceToAdd) {
+				if (!pieceToAdd) {
 					throw new Error(`Unknown piece ${letter}`);
 				}
 				if (topAngle < 360) {
@@ -121,7 +99,7 @@ export class Cube {
 				} else {
 					this.bottom.push(pieceToAdd);
 				}
-				allPieces = allPieces.filter(piece => piece !== pieceToAdd);
+				allPieces = allPieces.filter((piece) => piece !== pieceToAdd);
 			}
 		}
 	}
@@ -143,7 +121,12 @@ export class Cube {
 			}
 			return min;
 		}, 0);
-		return [...this.top.slice(topIndex), ...this.top.slice(0, topIndex), ...this.bottom.slice(bottomIndex), ...this.bottom.slice(0, bottomIndex)].slice(0, -1);
+		return [
+			...this.top.slice(topIndex),
+			...this.top.slice(0, topIndex),
+			...this.bottom.slice(bottomIndex),
+			...this.bottom.slice(0, bottomIndex),
+		].slice(0, -1);
 	}
 
 	get fullId() {
@@ -164,8 +147,8 @@ export class Cube {
 		return id;
 	}
 
-	cloneWith(fn: (cube: Cube) => void) {
-		const cube = new Cube();
+	cloneWith(fn: (cube: CubeSquare1) => void) {
+		const cube = new CubeSquare1();
 		cube.top = this.top;
 		cube.middle = this.middle;
 		cube.bottom = this.bottom;
@@ -222,12 +205,9 @@ export class Cube {
 		];
 	}
 
-	swap(topIndex: number, bottomIndex: number): Cube | null {
+	swap(topIndex: number, bottomIndex: number): CubeSquare1 | null {
 		const cubeWithRotatedTopAndBottom = this.cloneWith((cube) => {
-			cube.top = [
-				...this.top.slice(topIndex),
-				...this.top.slice(0, topIndex),
-			];
+			cube.top = [...this.top.slice(topIndex), ...this.top.slice(0, topIndex)];
 			cube.bottom = [
 				...this.bottom.slice(bottomIndex),
 				...this.bottom.slice(0, bottomIndex),
@@ -236,8 +216,7 @@ export class Cube {
 
 		try {
 			return cubeWithRotatedTopAndBottom.moveMiddle()[0];
-		}
-		catch (e) {
+		} catch (e) {
 			return null;
 		}
 	}
@@ -267,7 +246,7 @@ export class Cube {
 			[
 				0,
 				toRad(
-					this[position].slice(0, moveIndex).reduce((a, b) => a + b.angle, 0)
+					this[position].slice(0, moveIndex).reduce((a, b) => a + b.angle, 0),
 				) + (!antiClockwise ? -2 * Math.PI : 0),
 				0,
 			],
@@ -307,7 +286,6 @@ export class Cube {
 		return [...pieces.slice(minIndex), ...pieces.slice(0, minIndex)];
 	}
 
-
 	get rotationlessShapeId() {
 		let id = 0;
 		if (!this.middle) id++;
@@ -317,7 +295,10 @@ export class Cube {
 				id++;
 			}
 		}
-		for (const piece of this.getMinimumShapeIdPieces(this.bottom).slice(0, -1)) {
+		for (const piece of this.getMinimumShapeIdPieces(this.bottom).slice(
+			0,
+			-1,
+		)) {
 			id <<= 1;
 			if (piece instanceof PizzaPiece) {
 				id++;
@@ -326,13 +307,12 @@ export class Cube {
 
 		return id;
 	}
-
 }
 
 export type State = [
-	currentCube: Cube,
+	currentCube: CubeSquare1,
 	movingPieces: Set<Piece>,
 	rotation: [number, number, number],
 	movingMiddle: boolean,
-	previousCube: Cube
+	previousCube: CubeSquare1,
 ];

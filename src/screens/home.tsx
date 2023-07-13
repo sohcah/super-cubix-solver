@@ -6,18 +6,17 @@ import { Kite } from "../components/kite.tsx";
 import { b, toRad } from "../components/shared.ts";
 import { Weird } from "../components/weird.tsx";
 import {
-	Color,
-	Cube,
-	getColorValue,
+	CubeSquare1,
 	KitePiece,
 	Piece,
 	PizzaPiece,
 	State,
-} from "../models/cube.ts";
+} from "../models/cubeSquare1.ts";
 import { ReactNode, useState } from "react";
 import { useSpring, animated } from "@react-spring/three";
 import { Redo, Undo } from "@tamagui/lucide-icons";
-import {solveForColours, solveForCube} from "../models/solver.ts";
+import { solveForColours, solveForCube } from "../models/solver.ts";
+import { Color, getColorValue } from "../models/colors.ts";
 
 const padding = 0;
 
@@ -162,7 +161,7 @@ export function CubeDisplay({
 	);
 }
 
-const initialCube = new Cube("kppkkpkp_kppkpkpk");
+const initialCube = new CubeSquare1("kppkkpkp_kppkpkpk");
 
 export function HomeScreen() {
 	const [state, setState] = useState<State>(() => [
