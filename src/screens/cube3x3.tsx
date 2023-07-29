@@ -10,12 +10,14 @@ import {
 	EdgePiece,
 	State,
 	AnyPiece,
+	PieceData,
 } from "../models/cube3x3.ts";
 import { ReactNode, useState } from "react";
 import { useSpring, animated, SpringValue } from "@react-spring/three";
 import { Redo, Undo } from "@tamagui/lucide-icons";
-import { getColorValue } from "../models/colors.ts";
+import { Color, getColorValue } from "../models/colors.ts";
 import { MidEdge } from "../components/midEdge.tsx";
+import { VerticalCentre } from "../components/verticalCentre.tsx";
 
 const padding = 0;
 
@@ -122,10 +124,12 @@ export function CubeDisplayInternal({
 		piece,
 		children,
 	}: {
-		piece: AnyPiece;
+		piece: AnyPiece | number;
 		children: ReactNode;
 	}) => {
-		const moving = movingPieces.has(piece.pieceId);
+		const moving = movingPieces.has(
+			typeof piece === "number" ? piece : piece.pieceId
+		);
 		return (
 			<animated.group
 				rotation-x={moving ? animation.rotationX : 0}
@@ -144,6 +148,15 @@ export function CubeDisplayInternal({
 			rotation-z={allAnimation.rotationZ}
 		>
 			{/*<pointLight position={[10, 10, 10]} />*/}
+			<Moving piece={Cube3x3.TOP_CENTER_PIECE_ID}>
+				<group position={[0, +padding + 2 / 3, 0]}>
+					<VerticalCentre
+						colors={{
+							top: getColorValue(Color.White),
+						}}
+					/>
+				</group>
+			</Moving>
 			{cube.top.map((piece, index) => (
 				<Moving piece={piece} key={piece.pieceId}>
 					<group position={[0, +padding + 2 / 3, 0]}>
@@ -155,6 +168,38 @@ export function CubeDisplayInternal({
 					</group>
 				</Moving>
 			))}
+			<Moving piece={Cube3x3.FRONT_CENTER_PIECE_ID}>
+				<group position={[0, 0, 0]}>
+					<PieceComponent
+						piece={new EdgePiece(new PieceData<2>([Color.Black, Color.Green]))}
+						angle={toRad(45) * 4}
+					/>
+				</group>
+			</Moving>
+			<Moving piece={Cube3x3.BACK_CENTER_PIECE_ID}>
+				<group position={[0, 0, 0]}>
+					<PieceComponent
+						piece={new EdgePiece(new PieceData<2>([Color.Black, Color.Blue]))}
+						angle={0}
+					/>
+				</group>
+			</Moving>
+			<Moving piece={Cube3x3.LEFT_CENTER_PIECE_ID}>
+				<group position={[0, 0, 0]}>
+					<PieceComponent
+						piece={new EdgePiece(new PieceData<2>([Color.Black, Color.Orange]))}
+						angle={toRad(45) * 6}
+					/>
+				</group>
+			</Moving>
+			<Moving piece={Cube3x3.RIGHT_CENTER_PIECE_ID}>
+				<group position={[0, 0, 0]}>
+					<PieceComponent
+						piece={new EdgePiece(new PieceData<2>([Color.Black, Color.Red]))}
+						angle={toRad(45) * 2}
+					/>
+				</group>
+			</Moving>
 
 			{cube.middle.map((piece, index) => (
 				<Moving piece={piece} key={piece.pieceId}>
@@ -168,6 +213,18 @@ export function CubeDisplayInternal({
 					</group>
 				</Moving>
 			))}
+
+			<Moving piece={Cube3x3.BOTTOM_CENTER_PIECE_ID}>
+				<group rotation={[0, Math.PI, Math.PI]}>
+					<group position={[0, +padding + 2 / 3, 0]}>
+						<VerticalCentre
+							colors={{
+								top: getColorValue(Color.Yellow),
+							}}
+						/>
+					</group>
+				</group>
+			</Moving>
 
 			{cube.bottom.map((piece, index) => (
 				<Moving piece={piece} key={piece.pieceId}>

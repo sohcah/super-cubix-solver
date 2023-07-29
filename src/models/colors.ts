@@ -5,6 +5,7 @@ export enum Color {
 	Yellow = "yellow",
 	Red = "red",
 	Blue = "blue",
+	Black = "black",
 }
 
 export function getColorValue(color: Color): [number, number, number] {
@@ -21,5 +22,7 @@ export function getColorValue(color: Color): [number, number, number] {
 			return [1, 0, 0];
 		case Color.Blue:
 			return [0, 0, 1];
+		case Color.Black:
+			return [0, 0, 0];
 	}
 }

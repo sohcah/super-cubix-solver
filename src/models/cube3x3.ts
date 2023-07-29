@@ -136,6 +136,13 @@ export class Cube3x3 {
 	static currentId = 0;
 	id = Cube3x3.currentId++;
 
+	static TOP_CENTER_PIECE_ID = -1;
+	static BOTTOM_CENTER_PIECE_ID = -2;
+	static LEFT_CENTER_PIECE_ID = -3;
+	static RIGHT_CENTER_PIECE_ID = -4;
+	static FRONT_CENTER_PIECE_ID = -5;
+	static BACK_CENTER_PIECE_ID = -6;
+
 	static DEFAULT_TOP = [
 		new CornerPiece(CornerPiece.Data.WhiteOrangeBlue),
 		new EdgePiece(EdgePiece.Data.WhiteBlue),
@@ -192,6 +199,7 @@ export class Cube3x3 {
 			this.middle[3],
 		];
 	}
+
 	set front(pieces: AnyPiece[]) {
 		this.top[6] = pieces[0].cloneWith((r) => {
 			r.rotation--;
@@ -405,7 +413,7 @@ export class Cube3x3 {
 
 	rotate(
 		position: "top" | "bottom" | "front" | "back" | "left" | "right",
-		antiClockwise: boolean,
+		antiClockwise: boolean
 	): State {
 		const newCube = this.cloneWith((cube) => {
 			if (antiClockwise) {
@@ -422,7 +430,17 @@ export class Cube3x3 {
 		});
 		return [
 			newCube,
-			new Set(newCube[position].map((i) => i.pieceId)),
+			new Set([
+				...newCube[position].map((i) => i.pieceId),
+				{
+					top: Cube3x3.TOP_CENTER_PIECE_ID,
+					bottom: Cube3x3.BOTTOM_CENTER_PIECE_ID,
+					front: Cube3x3.FRONT_CENTER_PIECE_ID,
+					back: Cube3x3.BACK_CENTER_PIECE_ID,
+					left: Cube3x3.LEFT_CENTER_PIECE_ID,
+					right: Cube3x3.RIGHT_CENTER_PIECE_ID,
+				}[position],
+			]),
 			[
 				["left", "right"].includes(position)
 					? toRad(90) * (antiClockwise === (position === "right") ? 1 : -1)
@@ -444,5 +462,5 @@ export type State = [
 	movingPieces: Set<number>,
 	rotation: [number, number, number],
 	previousCube: Cube3x3,
-	allRotation?: [number, number, number],
+	allRotation?: [number, number, number]
 ];
