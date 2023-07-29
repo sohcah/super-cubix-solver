@@ -1,5 +1,4 @@
 import { Button, XStack, YStack } from "tamagui";
-import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Edge } from "../components/edge.tsx";
 import { Corner } from "../components/corner.tsx";
@@ -18,6 +17,7 @@ import { Redo, Undo } from "@tamagui/lucide-icons";
 import { Color, getColorValue } from "../models/colors.ts";
 import { MidEdge } from "../components/midEdge.tsx";
 import { VerticalCentre } from "../components/verticalCentre.tsx";
+import { BridgedCanvas, BridgedHtml } from "../utils/bridged.tsx";
 
 const padding = 0;
 
@@ -94,9 +94,47 @@ function PieceComponent({
 	throw new Error("Unknown piece type");
 }
 
+function ArrowButton({
+	onPress,
+	position,
+	rotation,
+	antiClockwise,
+}: {
+	onPress: () => void;
+	position?: [number, number, number];
+	rotation: [number, number, number];
+	antiClockwise?: boolean;
+}) {
+	return (
+		<group rotation={rotation}>
+			<BridgedHtml occlude distanceFactor={2} position={position ?? (
+				antiClockwise ? [-0.8, 0.8, 1] : [0.8, 0.8, 1]
+			)} transform>
+				<Button
+					onPress={onPress}
+					size="$10"
+					rotate={antiClockwise ? "-30deg" : "30deg"}
+					chromeless
+					hoverStyle={{
+						backgroundColor: "transparent",
+						borderColor: "transparent",
+					}}
+					focusStyle={{
+						backgroundColor: "transparent",
+						borderColor: "transparent",
+						outlineColor: "transparent",
+					}}
+					icon={antiClockwise ? Undo : Redo}
+				/>
+			</BridgedHtml>
+		</group>
+	);
+}
+
 export function CubeDisplayInternal({
 	state: [, movingPieces, rotation, cube],
 	allAnimation,
+	onAction,
 }: {
 	state: State;
 	allAnimation: {
@@ -104,6 +142,10 @@ export function CubeDisplayInternal({
 		rotationY: SpringValue<number>;
 		rotationZ: SpringValue<number>;
 	};
+	onAction(
+		action: "front" | "back" | "left" | "right" | "top" | "bottom",
+		antiClockwise: boolean,
+	): void;
 }) {
 	const animation = useSpring({
 		rotationX: 0,
@@ -128,7 +170,7 @@ export function CubeDisplayInternal({
 		children: ReactNode;
 	}) => {
 		const moving = movingPieces.has(
-			typeof piece === "number" ? piece : piece.pieceId
+			typeof piece === "number" ? piece : piece.pieceId,
 		);
 		return (
 			<animated.group
@@ -239,13 +281,75 @@ export function CubeDisplayInternal({
 					</group>
 				</Moving>
 			))}
+
+			<ArrowButton
+				onPress={() => onAction("front", true)}
+				rotation={[0, 0, 0]}
+				antiClockwise
+			/>
+			<ArrowButton
+				onPress={() => onAction("front", false)}
+				rotation={[0, 0, 0]}
+			/>
+			<ArrowButton
+				onPress={() => onAction("back", true)}
+				rotation={[0, Math.PI, 0]}
+				antiClockwise
+			/>
+			<ArrowButton
+				onPress={() => onAction("back", false)}
+				rotation={[0, Math.PI, 0]}
+			/>
+			<ArrowButton
+				onPress={() => onAction("left", true)}
+				rotation={[0, -Math.PI / 2, 0]}
+				antiClockwise
+			/>
+			<ArrowButton
+				onPress={() => onAction("left", false)}
+				rotation={[0, -Math.PI / 2, 0]}
+			/>
+			<ArrowButton
+				onPress={() => onAction("right", true)}
+				rotation={[0, Math.PI / 2, 0]}
+				antiClockwise
+			/>
+			<ArrowButton
+				onPress={() => onAction("right", false)}
+				rotation={[0, Math.PI / 2, 0]}
+			/>
+			<ArrowButton
+				onPress={() => onAction("top", true)}
+				rotation={[-Math.PI / 2, 0, 0]}
+				antiClockwise
+			/>
+			<ArrowButton
+				onPress={() => onAction("top", false)}
+				rotation={[-Math.PI / 2, 0, 0]}
+			/>
+			<ArrowButton
+				onPress={() => onAction("bottom", true)}
+				rotation={[Math.PI / 2, 0, 0]}
+				antiClockwise
+			/>
+			<ArrowButton
+				onPress={() => onAction("bottom", false)}
+				rotation={[Math.PI / 2, 0, 0]}
+			/>
+
 		</animated.group>
 	);
 }
 
 const initialCube = new Cube3x3();
 
-function CubeDisplay({ state }: { state: State }) {
+function CubeDisplay({
+	state,
+	onAction,
+}: {
+	state: State;
+	onAction: Parameters<typeof CubeDisplayInternal>[0]["onAction"];
+}) {
 	const allAnimation = useSpring({
 		rotationX: state[4]?.[0] ?? 0,
 		rotationY: state[4]?.[1] ?? 0,
@@ -253,6 +357,7 @@ function CubeDisplay({ state }: { state: State }) {
 	});
 	return (
 		<CubeDisplayInternal
+			onAction={onAction}
 			key={state[0].id}
 			state={state}
 			allAnimation={allAnimation}
@@ -295,24 +400,24 @@ export function Cube3x3Screen() {
 				top="$2"
 				zIndex={1}
 			>
-				<XStack gap="$2">
-					<Button
-						icon={Undo}
-						onPress={() => {
-							setState(state[0].rotate("top", true));
-						}}
-					>
-						Top
-					</Button>
-					<Button
-						icon={Redo}
-						onPress={() => {
-							setState(state[0].rotate("top", false));
-						}}
-					>
-						Top
-					</Button>
-				</XStack>
+				{/*<XStack gap="$2">*/}
+				{/*	<Button*/}
+				{/*		icon={Undo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("top", true));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Top*/}
+				{/*	</Button>*/}
+				{/*	<Button*/}
+				{/*		icon={Redo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("top", false));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Top*/}
+				{/*	</Button>*/}
+				{/*</XStack>*/}
 				<XStack gap="$2">
 					<Button
 						icon={Undo}
@@ -358,102 +463,116 @@ export function Cube3x3Screen() {
 						Middle
 					</Button>
 				</XStack>
-				<XStack gap="$2">
-					<Button
-						icon={Undo}
-						onPress={() => {
-							setState(state[0].rotate("bottom", true));
-						}}
-					>
-						Bottom
-					</Button>
-					<Button
-						icon={Redo}
-						onPress={() => {
-							setState(state[0].rotate("bottom", false));
-						}}
-					>
-						Bottom
-					</Button>
-				</XStack>
-				<XStack gap="$2">
-					<Button
-						icon={Undo}
-						onPress={() => {
-							setState(state[0].rotate("front", true));
-						}}
-					>
-						Front
-					</Button>
-					<Button
-						icon={Redo}
-						onPress={() => {
-							setState(state[0].rotate("front", false));
-						}}
-					>
-						Front
-					</Button>
-				</XStack>
-				<XStack gap="$2">
-					<Button
-						icon={Undo}
-						onPress={() => {
-							setState(state[0].rotate("back", true));
-						}}
-					>
-						Back
-					</Button>
-					<Button
-						icon={Redo}
-						onPress={() => {
-							setState(state[0].rotate("back", false));
-						}}
-					>
-						Back
-					</Button>
-				</XStack>
-				<XStack gap="$2">
-					<Button
-						icon={Undo}
-						onPress={() => {
-							setState(state[0].rotate("left", true));
-						}}
-					>
-						Left
-					</Button>
-					<Button
-						icon={Redo}
-						onPress={() => {
-							setState(state[0].rotate("left", false));
-						}}
-					>
-						Left
-					</Button>
-				</XStack>
-				<XStack gap="$2">
-					<Button
-						icon={Undo}
-						onPress={() => {
-							setState(state[0].rotate("right", true));
-						}}
-					>
-						Right
-					</Button>
-					<Button
-						icon={Redo}
-						onPress={() => {
-							setState(state[0].rotate("right", false));
-						}}
-					>
-						Right
-					</Button>
-				</XStack>
+				{/*<XStack gap="$2">*/}
+				{/*	<Button*/}
+				{/*		icon={Undo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("bottom", true));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Bottom*/}
+				{/*	</Button>*/}
+				{/*	<Button*/}
+				{/*		icon={Redo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("bottom", false));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Bottom*/}
+				{/*	</Button>*/}
+				{/*</XStack>*/}
+				{/*<XStack gap="$2">*/}
+				{/*	<Button*/}
+				{/*		icon={Undo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("front", true));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Front*/}
+				{/*	</Button>*/}
+				{/*	<Button*/}
+				{/*		icon={Redo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("front", false));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Front*/}
+				{/*	</Button>*/}
+				{/*</XStack>*/}
+				{/*<XStack gap="$2">*/}
+				{/*	<Button*/}
+				{/*		icon={Undo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("back", true));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Back*/}
+				{/*	</Button>*/}
+				{/*	<Button*/}
+				{/*		icon={Redo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("back", false));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Back*/}
+				{/*	</Button>*/}
+				{/*</XStack>*/}
+				{/*<XStack gap="$2">*/}
+				{/*	<Button*/}
+				{/*		icon={Undo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("left", true));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Left*/}
+				{/*	</Button>*/}
+				{/*	<Button*/}
+				{/*		icon={Redo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("left", false));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Left*/}
+				{/*	</Button>*/}
+				{/*</XStack>*/}
+				{/*<XStack gap="$2">*/}
+				{/*	<Button*/}
+				{/*		icon={Undo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("right", true));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Right*/}
+				{/*	</Button>*/}
+				{/*	<Button*/}
+				{/*		icon={Redo}*/}
+				{/*		onPress={() => {*/}
+				{/*			setState(state[0].rotate("right", false));*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		Right*/}
+				{/*	</Button>*/}
+				{/*</XStack>*/}
 			</XStack>
-			<Canvas style={{ flex: 1 }}>
+			<BridgedCanvas style={{ flex: 1 }}>
 				<OrbitControls enableDamping enablePan enableRotate enableZoom />
 				<ambientLight intensity={1} />
-				<CubeDisplay state={state} />
-			</Canvas>
+				<CubeDisplay
+					state={state}
+					onAction={(action, antiClockwise) => {
+						switch (action) {
+							case "front":
+							case "back":
+							case "left":
+							case "right":
+							case "top":
+							case "bottom":
+								setState(state[0].rotate(action, antiClockwise));
+								break;
+						}
+					}}
+				/>
+			</BridgedCanvas>
 		</YStack>
 	);
 }

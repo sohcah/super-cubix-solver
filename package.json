@@ -19,6 +19,7 @@
     "@tamagui/lucide-icons": "^1.38.2",
     "@tamagui/shorthands": "^1.38.2",
     "@tamagui/theme-base": "^1.38.2",
+    "its-fine": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tamagui": "^1.38.2",
