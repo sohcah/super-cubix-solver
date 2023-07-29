@@ -161,9 +161,9 @@ export function CubeDisplay({
 	);
 }
 
-const initialCube = new CubeSquare1("kppkkpkp_kppkpkpk");
+const initialCube = new CubeSquare1("kpkpkpkp_pkpkpkpk");
 
-export function HomeScreen() {
+export function CubeSquare1Screen() {
 	const [state, setState] = useState<State>(() => [
 		initialCube,
 		new Set([]),
